@@ -1,24 +1,40 @@
 package com.taller.bdmoviles.ui.viewmodels
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.taller.bdmoviles.model.AppDatabase
 import com.taller.bdmoviles.model.Tarea
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class TareasViewModel : ViewModel() {
+// Notar que heredamos de AndroidViewModel para tener acceso al Application (Contexto)
+class TareasViewModel(application: Application) : AndroidViewModel(application) {
 
-    // TODO (Día 2/3): Reemplazar esta lista en memoria por una consulta (Query) reactiva a la Base de Datos
-    private val _tareas = MutableStateFlow<List<Tarea>>(emptyList())
-    val tareas: StateFlow<List<Tarea>> = _tareas
+    // 1. Inicializamos la base de datos llamando a nuestro Singleton
+    private val tareaDao = AppDatabase.getDatabase(application).tareaDao()
 
+    // 2. Lectura Asíncrona (Reemplaza la lista temporal)
+    val tareas: StateFlow<List<Tarea>> = tareaDao.obtenerTodasLasTareas()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    // 3. Inserción Segura
     fun agregarTarea(descripcion: String) {
-        // TODO (Día 2/3): Ejecutar un DAO.insert() o Realm.insert() aquí
-        val nuevaTarea = Tarea(id = _tareas.value.size + 1, descripcion = descripcion)
-        _tareas.value = _tareas.value + nuevaTarea
+        viewModelScope.launch {
+            tareaDao.insertar(Tarea(descripcion = descripcion))
+        }
     }
 
+    // 4. Eliminación Segura
     fun eliminarTarea(tarea: Tarea) {
-        // TODO (Día 2/3): Ejecutar un DAO.delete() o Realm.delete() aquí
-        _tareas.value = _tareas.value.filter { it.id != tarea.id }
+        viewModelScope.launch {
+            tareaDao.eliminar(tarea)
+        }
     }
 }
