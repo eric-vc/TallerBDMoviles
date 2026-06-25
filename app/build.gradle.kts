@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp") version "2.2.10-2.0.2"
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -59,4 +60,12 @@ dependencies {
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
+    // Plataforma de Firebase (BoM)
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+
+    // Librería oficial para Cloud Firestore
+    implementation("com.google.firebase:firebase-firestore")
+
+    // Soporte para transformar tareas de Firebase en Corrutinas de Kotlin
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 }
