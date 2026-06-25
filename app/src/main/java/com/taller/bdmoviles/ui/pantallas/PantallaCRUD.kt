@@ -12,7 +12,7 @@ import com.taller.bdmoviles.ui.viewmodels.TareasViewModel
 @Composable
 fun PantallaCRUD(viewModel: TareasViewModel) {
     // La lista se actualizará sola cuando la BD cambie
-    val listaTareas by viewModel.tareas.collectAsState()
+    val listaTareas by viewModel.tareasNube.collectAsState()
     var nuevaTareaTexto by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -32,7 +32,7 @@ fun PantallaCRUD(viewModel: TareasViewModel) {
             Button(
                 onClick = {
                     if(nuevaTareaTexto.isNotBlank()) {
-                        viewModel.agregarTarea(nuevaTareaTexto)
+                        viewModel.agregarTareaNube(nuevaTareaTexto)
                         nuevaTareaTexto = "" // Limpiar input
                     }
                 },
@@ -53,7 +53,7 @@ fun PantallaCRUD(viewModel: TareasViewModel) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(text = tarea.descripcion)
-                    IconButton(onClick = { viewModel.eliminarTarea(tarea) }) {
+                    IconButton(onClick = { viewModel.eliminarTareaNube(tarea.id) }) {
                         Text("❌")
                     }
                 }
